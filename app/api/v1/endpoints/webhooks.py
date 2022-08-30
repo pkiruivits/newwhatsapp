@@ -68,31 +68,33 @@ async def inbound_sms(*,request: Request, db: AsyncSession = Depends(get_db_sess
     ]
 }
     '''
-   
-    sms_id=json_object['entry'][0]['changes'][0]['value']['messages'][0]['id']
-    type=json_object['entry'][0]['changes'][0]['value']['messages'][0]['type']
-    
-    list_reply_id=""
-    reply_tittle=""
-    reply_description=""
-    newinbound=await crud.get_sms_by_id(db,sms_id)
-    if newinbound is None:
-        Request_id=json_object['entry'][0]['id']
-        display_phone=json_object['entry'][0]['changes'][0]['value']['metadata']['display_phone_number']
-        phone_no_id=json_object['entry'][0]['changes'][0]['value']['metadata']['phone_number_id']
-        contact_name=json_object['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name']
-        contact_wa_id=json_object['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id']
-        if type=="interactive":
-            list_reply_id=text_body=json_object['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']
-            reply_tittle=text_body=json_object['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['title']
-            reply_description=text_body=json_object['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['description']
-   # schema={'Request_id':Request_id,'display_phone':display_phone,'phone_no_id':phone_no_id,'contact_name':contact_name,'contact_wa_id':contact_wa_id,'sms_id':sms_id,'type':type,'text_body':text_body,'replied':False}
-        if type=="text":
-            text_body=json_object['entry'][0]['changes'][0]['value']['messages'][0]['text']['body']
-        smsinbound=smsinboundschema.smsinboundCreate(Request_id=Request_id,display_phone=display_phone,phone_no_id=phone_no_id,contact_name=contact_name,contact_wa_id=contact_wa_id,sms_id=sms_id,type=type,text_body=text_body,list_reply_id=list_reply_id,reply_tittle=reply_tittle,reply_description=reply_description)
-        print("schema",smsinbound)
-        smsinboundmodel=await crud.create_inbound(db,smsinbound)
-            
+    try:
+        sms_id=json_object['entry'][0]['changes'][0]['value']['messages'][0]['id']
+        print("this is sms id",sms_id)
+        type=json_object['entry'][0]['changes'][0]['value']['messages'][0]['type']
+        
+        list_reply_id=""
+        reply_tittle=""
+        reply_description=""
+        newinbound=await crud.get_sms_by_id(db,sms_id)
+        if newinbound is None:
+            Request_id=json_object['entry'][0]['id']
+            display_phone=json_object['entry'][0]['changes'][0]['value']['metadata']['display_phone_number']
+            phone_no_id=json_object['entry'][0]['changes'][0]['value']['metadata']['phone_number_id']
+            contact_name=json_object['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name']
+            contact_wa_id=json_object['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id']
+            if type=="interactive":
+                list_reply_id=text_body=json_object['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']
+                reply_tittle=text_body=json_object['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['title']
+                reply_description=text_body=json_object['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['description']
+    # schema={'Request_id':Request_id,'display_phone':display_phone,'phone_no_id':phone_no_id,'contact_name':contact_name,'contact_wa_id':contact_wa_id,'sms_id':sms_id,'type':type,'text_body':text_body,'replied':False}
+            if type=="text":
+                text_body=json_object['entry'][0]['changes'][0]['value']['messages'][0]['text']['body']
+            smsinbound=smsinboundschema.smsinboundCreate(Request_id=Request_id,display_phone=display_phone,phone_no_id=phone_no_id,contact_name=contact_name,contact_wa_id=contact_wa_id,sms_id=sms_id,type=type,text_body=text_body,list_reply_id=list_reply_id,reply_tittle=reply_tittle,reply_description=reply_description)
+            print("schema",smsinbound)
+            smsinboundmodel=await crud.create_inbound(db,smsinbound)
+    except:
+        pass           
     #print('body object',rbody)
     return  {"received_request_body": rbody}
     
