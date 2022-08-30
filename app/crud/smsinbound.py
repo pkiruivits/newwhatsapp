@@ -19,7 +19,7 @@ async def get_sms_by_id(db: AsyncSession, sms_id: str):
             .filter(smsinboundmodel.SmsInbound.sms_id==sms_id)
              )
     await db.commit()
-    return result.scalars().one()
+    return result.scalars().one_or_none()
     
 
 def get_user_by_email(db: Session, email: str):

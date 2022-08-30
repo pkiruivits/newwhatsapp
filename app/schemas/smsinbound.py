@@ -12,8 +12,12 @@ class smsinboundBase(BaseModel):
     type: str
     text_body: str
     replied: bool=False
-    #created_at: Optional[datetime]
-   
+    list_reply_id : Optional[str]
+    reply_tittle : Optional[str]
+    reply_description : Optional[str]
+    #created_at: Optional[datetime] Optional[str]
+    class Config:
+        arbitrary_types_allowed = True
 
 class smsinboundCreate(smsinboundBase):
     pass
