@@ -68,11 +68,7 @@ async def inbound_sms(*,request: Request, db: AsyncSession = Depends(get_db_sess
     ]
 }
     '''
-    Request_id=json_object['entry'][0]['id']
-    display_phone=json_object['entry'][0]['changes'][0]['value']['metadata']['display_phone_number']
-    phone_no_id=json_object['entry'][0]['changes'][0]['value']['metadata']['phone_number_id']
-    contact_name=json_object['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name']
-    contact_wa_id=json_object['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id']
+   
     sms_id=json_object['entry'][0]['changes'][0]['value']['messages'][0]['id']
     type=json_object['entry'][0]['changes'][0]['value']['messages'][0]['type']
     
@@ -81,6 +77,11 @@ async def inbound_sms(*,request: Request, db: AsyncSession = Depends(get_db_sess
     reply_description=""
     newinbound=await crud.get_sms_by_id(db,sms_id)
     if newinbound is None:
+        Request_id=json_object['entry'][0]['id']
+        display_phone=json_object['entry'][0]['changes'][0]['value']['metadata']['display_phone_number']
+        phone_no_id=json_object['entry'][0]['changes'][0]['value']['metadata']['phone_number_id']
+        contact_name=json_object['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name']
+        contact_wa_id=json_object['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id']
         if type=="interactive":
             list_reply_id=text_body=json_object['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']
             reply_tittle=text_body=json_object['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['title']
