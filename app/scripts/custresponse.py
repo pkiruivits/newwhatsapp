@@ -54,6 +54,7 @@ async def sync_inbounds():
                 print("token",settings.WHATSAPP_API_TOKEN)
                 
                 dataup={"state":3}
+                print("body object found",ac.text_body)
                 if ac.text_body=="Guide" or ac.text_body=="Help" or ac.type=="interactive":
                     await smsinbound.sentsmsinteractive(settings.WHATSAPP_API_TOKEN,ac.contact_wa_id,smstext,ac.sms_id,db)
                 else:

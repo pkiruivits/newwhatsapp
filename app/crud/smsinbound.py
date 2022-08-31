@@ -160,7 +160,7 @@ async def sentsmsinteractive(tokenstr:str,phone:str,message:str,prevsmsid:str,db
     print("reached sent sms",phone)
     currentsms:smsinboundmodel.SmsInbound=await get_sms_by_id(db,prevsmsid)
     if currentsms is not None:
-        if currentsms.text_body=="Guide" or currentsms.text_body=="Help" or currentsms.text_body=="Interactive" :
+        if currentsms.text_body=="Guide" or currentsms.text_body=="Help":
             rows=[
                     {
                     "id": "Bulk_sms",
@@ -279,10 +279,10 @@ async def sentsmsinteractive(tokenstr:str,phone:str,message:str,prevsmsid:str,db
     }
     print
     print(payload1,headers)
-    # conn.request("POST", "/v14.0/103570139153202/messages", payload1, headers)
-    # res = conn.getresponse()
-    # data = res.read()
-    # print(data.decode("utf-8"))#
+    conn.request("POST", "/v14.0/103570139153202/messages", payload1, headers)
+    res = conn.getresponse()
+    data = res.read()
+    print(data.decode("utf-8"))#
     return payload1
 
 async def update_sent(db:AsyncSession,msg_id:str):
