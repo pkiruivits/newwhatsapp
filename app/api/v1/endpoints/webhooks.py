@@ -73,9 +73,9 @@ async def inbound_sms(*,request: Request, db: AsyncSession = Depends(get_db_sess
         print("this is sms id",sms_id)
         type=json_object['entry'][0]['changes'][0]['value']['messages'][0]['type']
         
-        # list_reply_id=""
-        # reply_tittle=""
-        # reply_description=""
+        list_reply_id=""
+        reply_tittle=""
+        reply_description=""
         newinbound=await crud.get_sms_by_id(db,sms_id)
         if newinbound is None:
             Request_id=json_object['entry'][0]['id']
