@@ -21,15 +21,6 @@ async def get_sms_by_id(db: AsyncSession, sms_id: str):
     await db.commit()
     return result.scalars().one_or_none()
     
-
-def get_user_by_email(db: Session, email: str):
-    return db.query(smsinboundmodel.User).filter(smsinboundmodel.User.email == email).first()
-
-
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(smsinboundmodel.User).offset(skip).limit(limit).all()
-
-
 async def create_inbound(db: Session, smsinbound: smsinboundschema.smsinboundCreate,commit=True):
 
     obj_in_data = jsonable_encoder(smsinbound, exclude_unset=True)
@@ -114,7 +105,185 @@ async def sentsms(tokenstr:str,phone:str,message:str,prevsmsid:str):
     res = conn.getresponse()
     data = res.read()
     print(data.decode("utf-8"))#
-    return payload
+    return payload 
+async def sentsmsinteractive(tokenstr:str,phone:str,message:str,prevsmsid:str,db:AsyncSession):
+    ''' sms body object
+   {
+  "messaging_product": "whatsapp",
+  "recipient_type": "individual",
+  "to": "254723369600",
+  "type": "interactive",
+  "interactive": {
+    "type": "list",
+    "header": {
+      "type": "text",
+      "text": "Cross Gate Solutions"
+    },
+    "body": {
+      "text": "Our Services"
+    },
+    "footer": {
+      "text": "Check on us"
+    },
+    "action": {
+      "button": "BUTTON_TEXT",
+      "sections": [
+        {
+          "title": "Select Option",
+          "rows": [
+            {
+              "id": "Bulk_sms",
+              "title": "Bulk services",
+              "description": "with custom sender id"
+            },
+            {
+              "id": "USSD",
+              "title": "USSD services",
+              "description": "with dedicated or shared codes"
+            },
+             {
+              "id": "short_code",
+              "title": "premium codes",
+              "description": "Pay for Nairobi water"
+            },
+             {
+              "id": "M_PESA",
+              "title": "M PESA",
+              "description": "M pesa integrations"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}'''
+    print("reached sent sms",phone)
+    currentsms:smsinboundmodel.SmsInbound=await get_sms_by_id(db,prevsmsid)
+    if currentsms is not None:
+        if currentsms.text_body=="Guide" or currentsms.text_body=="Help" or currentsms.text_body=="Interactive" :
+            rows=[
+                    {
+                    "id": "Bulk_sms",
+                    "title": "Bulk services",
+                    "description": "with custom sender id"
+                    },
+                    {
+                    "id": "USSD",
+                    "title": "USSD services",
+                    "description": "with dedicated or shared codes"
+                    },
+                    {
+                    "id": "short_code",
+                    "title": "premium codes",
+                    "description": "...two way conversations with shortcode"
+                    },
+                    {
+                    "id": "M_PESA",
+                    "title": "M PESA",
+                    "description": "M pesa integrations"
+                    },
+                    {
+                    "id": "Airtime",
+                    "title": "Airtime",
+                    "description": "Airtime purchase"
+                    }
+                ]
+        if currentsms.list_reply_id=="Bulk_sms":
+            rows=[
+                    {
+                    "id": "0-1000",
+                    "title": "Tier 0-1000",
+                    "description": "Rate ksh 1.00"
+                    },
+                    {
+                    "id": "1001-100000",
+                    "title": "Tier 1001-100000",
+                    "description": "Rate ksh 0.80"
+                    },
+                    {
+                    "id": "100001-1000000",
+                    "title": "Tier 100001-1000000",
+                    "description": "Rate ksh 0.70"
+                    },
+                    {
+                    "id": "over-1000000",
+                    "title": "over 1m",
+                    "description": "Rate ksh 0.50"
+                    }
+                ]
+        if currentsms.list_reply_id=="USSD":
+            rows=[
+                    {
+                    "id": "Dedicated",
+                    "title": "Dedicated",
+                    "description": "like *421#"
+                    },
+                    {
+                    "id": "shared",
+                    "title": "shared",
+                    "description": "like *421*1#"
+                    }
+                ]
+        if currentsms.list_reply_id=="Airtime":
+            rows=[
+                    {
+                    "id": "Safaricom",
+                    "title": "Safaricom",
+                    "description": "Safaricom Airtime"
+                    },
+                    {
+                    "id": "Telkom",
+                    "title": "Telkom",
+                    "description": "Telkom Airtime"
+                    },
+                    {
+                    "id": "Airtel",
+                    "title": "Airtel",
+                    "description": "Airtel Airtime"
+                    }
+                ]
+    bodyobj={
+  "messaging_product": "whatsapp",
+  "recipient_type": "individual",
+  "to": phone,
+  "type": "interactive",
+  "interactive": {
+    "type": "list",
+    "header": {
+      "type": "text",
+      "text": "Cross Gate Solutions"
+    },
+    "body": {
+      "text": "Our Services"
+    },
+    "footer": {
+      "text": "Check on us"
+    },
+    "action": {
+      "button": "Click",
+      "sections": [
+        {
+          "title": "Select Option",
+          "rows": rows
+        }
+      ]
+    }
+  }
+}
+    conn = http.client.HTTPSConnection("graph.facebook.com")
+    payload1 = json.dumps(bodyobj)
+    
+    headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer '+tokenstr
+    }
+    print
+    print(payload1,headers)
+    # conn.request("POST", "/v14.0/103570139153202/messages", payload1, headers)
+    # res = conn.getresponse()
+    # data = res.read()
+    # print(data.decode("utf-8"))#
+    return payload1
 
 async def update_sent(db:AsyncSession,msg_id:str):
     

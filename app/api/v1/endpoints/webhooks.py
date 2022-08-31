@@ -73,9 +73,9 @@ async def inbound_sms(*,request: Request, db: AsyncSession = Depends(get_db_sess
         print("this is sms id",sms_id)
         type=json_object['entry'][0]['changes'][0]['value']['messages'][0]['type']
         
-        list_reply_id=""
-        reply_tittle=""
-        reply_description=""
+        # list_reply_id=""
+        # reply_tittle=""
+        # reply_description=""
         newinbound=await crud.get_sms_by_id(db,sms_id)
         if newinbound is None:
             Request_id=json_object['entry'][0]['id']
@@ -93,8 +93,8 @@ async def inbound_sms(*,request: Request, db: AsyncSession = Depends(get_db_sess
             smsinbound=smsinboundschema.smsinboundCreate(Request_id=Request_id,display_phone=display_phone,phone_no_id=phone_no_id,contact_name=contact_name,contact_wa_id=contact_wa_id,sms_id=sms_id,type=type,text_body=text_body,list_reply_id=list_reply_id,reply_tittle=reply_tittle,reply_description=reply_description)
             print("schema",smsinbound)
             smsinboundmodel=await crud.create_inbound(db,smsinbound)
-    except:
-        pass           
+    except Exception as e:
+        print("error occured",e)           
     #print('body object',rbody)
     return  {"received_request_body": rbody}
     
