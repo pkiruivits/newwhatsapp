@@ -177,7 +177,7 @@ async def sentsmsinteractive(tokenstr:str,phone:str,message:str,prevsmsid:str,db
           smstext="To purchase units, go to mpesa menu: \n 1. Select lipa na mpesa paybill \n 2. Enter business no 477333 \n 3. Company name as Account number \n \n Enter amount then password \n Enjoy with us "
           await sentsms(tokenstr,phone,smstext,prevsmsid)          
           return http.client.OK
-        if currentsms.list_reply_id in("Safaricom","Telkom","Airtel"):
+        if currentsms.list_reply_id in("Safaricom","Telkom","Airtel","Dedicated","shared"):
           smstext="Thanks for checking on us \n unfortunately this is being cooked!! "
           await sentsms(tokenstr,phone,smstext,prevsmsid)          
           return http.client.OK
