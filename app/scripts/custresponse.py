@@ -26,10 +26,6 @@ from app.crud import smsinbound
 
 import asyncio
 
-# Initialize SDK
-username = "cloudpesaea"    # use 'sandbox' for development in the test environment
-api_key = "aaaf8f4be10e983d6abd3b2844bb7b421cf9a923ebb1cba25af92147abb0c73b"      # use your sandbox app API key for development in the test environment
-
 
 async def sync_inbounds():
 

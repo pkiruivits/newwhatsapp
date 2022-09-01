@@ -105,7 +105,7 @@ async def read_inbounds(skip: int = 0, limit: int = 100, db: AsyncSession = Depe
 
 @router.get("/readyinbounds/", tags=['ready inbounds'])
 async def ready_inbounds(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db_session)):
-    inbounds =await crud.get_inbounds(db, limit=limit)
+    inbounds =await crud.get_ready_inbounds(db, limit=limit)
     return inbounds
 
 # @router.get("/users/{user_id}", response_model=userschema.User, tags=['users'])

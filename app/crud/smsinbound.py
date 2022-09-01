@@ -44,6 +44,15 @@ async def get_inbounds(db: AsyncSession, skip: int = 0, limit: int = 100)-> List
         await db.commit()
         return result.scalars().all()
 
+async def get_ready_inbounds(db: AsyncSession, skip: int = 0, limit: int = 100)-> List[smsinboundmodel.SmsInbound]:
+        result = await db.execute(
+            select(smsinboundmodel.SmsInbound)
+            .filter(smsinboundmodel.SmsInbound.replied==False)
+            .offset(skip)
+            .limit(limit)
+        )
+        await db.commit()
+        return result.scalars().all()
 async def get_all_waiting(db: AsyncSession, limit: int = 100):
     result = await db.execute(
             select(smsinboundmodel.SmsInbound).filter(smsinboundmodel.SmsInbound.replied==False).limit(limit)
@@ -160,6 +169,18 @@ async def sentsmsinteractive(tokenstr:str,phone:str,message:str,prevsmsid:str,db
     print("reached sent sms",phone)
     currentsms:smsinboundmodel.SmsInbound=await get_sms_by_id(db,prevsmsid)
     if currentsms is not None:
+        if currentsms.list_reply_id=="Rates":
+          smstext="We offer bulk at the following rates: \n 1-100k units at ksh 1.00 \n 100k-500k units at ksh 0.8 \n 500k-1m at ksh 0.6 \n over 1m units at ksh 0.5 \n Feel free to contact cross gate solutions"
+          await sentsms(tokenstr,phone,smstext,prevsmsid)          
+          return http.client.OK
+        if currentsms.list_reply_id=="Purchase":
+          smstext="To purchase units, go to mpesa menu: \n 1. Select lipa na mpesa paybill \n 2. Enter business no 477333 \n 3. Company name as Account number \n \n Enter amount then password \n Enjoy with us "
+          await sentsms(tokenstr,phone,smstext,prevsmsid)          
+          return http.client.OK
+        if currentsms.list_reply_id in("Safaricom","Telkom","Airtel"):
+          smstext="Thanks for checking on us \n unfortunately this is being cooked!! "
+          await sentsms(tokenstr,phone,smstext,prevsmsid)          
+          return http.client.OK
         if currentsms.text_body=="Guide" or currentsms.text_body=="Help":
             rows=[
                     {
@@ -190,27 +211,37 @@ async def sentsmsinteractive(tokenstr:str,phone:str,message:str,prevsmsid:str,db
                 ]
         if currentsms.list_reply_id=="Bulk_sms":
             rows=[
-                    {
-                    "id": "0-1000",
-                    "title": "Tier 0-1000",
-                    "description": "Rate ksh 1.00"
+                     {
+                    "id": "Rates",
+                    "title": "Rates",
+                    "description": "Get Rates"
                     },
                     {
-                    "id": "1001-100000",
-                    "title": "Tier 1001-100000",
-                    "description": "Rate ksh 0.80"
-                    },
-                    {
-                    "id": "100001-1000000",
-                    "title": "Tier 100001-1000000",
-                    "description": "Rate ksh 0.70"
-                    },
-                    {
-                    "id": "over-1000000",
-                    "title": "over 1m",
-                    "description": "Rate ksh 0.50"
+                    "id": "purchase",
+                    "title": "Purchase",
+                    "description": "How to purchase"
                     }
                 ]
+                # {
+                #     "id": "0-1000",
+                #     "title": "Tier 0-1000",
+                #     "description": "Rate ksh 1.00"
+                #     },
+                #     {
+                #     "id": "1001-100000",
+                #     "title": "Tier 1001-100000",
+                #     "description": "Rate ksh 0.80"
+                #     },
+                #     {
+                #     "id": "100001-1000000",
+                #     "title": "Tier 100001-1000000",
+                #     "description": "Rate ksh 0.70"
+                #     },
+                #     {
+                #     "id": "over-1000000",
+                #     "title": "over 1m",
+                #     "description": "Rate ksh 0.50"
+                #     }
         if currentsms.list_reply_id=="USSD":
             rows=[
                     {
@@ -242,6 +273,7 @@ async def sentsmsinteractive(tokenstr:str,phone:str,message:str,prevsmsid:str,db
                     "description": "Airtel Airtime"
                     }
                 ]
+        
     bodyobj={
   "messaging_product": "whatsapp",
   "recipient_type": "individual",
@@ -269,7 +301,8 @@ async def sentsmsinteractive(tokenstr:str,phone:str,message:str,prevsmsid:str,db
       ]
     }
   }
-}
+}   
+    
     conn = http.client.HTTPSConnection("graph.facebook.com")
     payload1 = json.dumps(bodyobj)
     
