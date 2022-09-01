@@ -217,7 +217,7 @@ async def sentsmsinteractive(tokenstr:str,phone:str,message:str,prevsmsid:str,db
                     "description": "Get Rates"
                     },
                     {
-                    "id": "purchase",
+                    "id": "Purchase",
                     "title": "Purchase",
                     "description": "How to purchase"
                     }
